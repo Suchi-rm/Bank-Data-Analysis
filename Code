@@ -1,0 +1,212 @@
+1.	K-means Clustering
+
+#import the libraries
+import pandas as pd   
+import numpy as np  
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.cluster  import KMeans  
+from sklearn.preprocessing  import MinMaxScaler
+from sklearn.preprocessing import LabelEncoder
+%matplotlib inline
+
+#import and display data
+dfa = pd.read_csv("P6-UK-Bank-Customers.csv")
+dfa.head()
+
+#to drop cloumns
+df1 = dfa.drop(['Customer ID','Name','Surname','Gender','Region','Job Classification','Date Joined'], axis=1)
+
+df1.shape #dimensions of the dataset
+
+# skewness along the index axis
+df1.skew(axis = 0, skipna = True)
+
+df5 = df1.median() #find median of age and balance
+
+df1.describe() #descriptive analysis
+
+df1.plot() #plot the data
+
+#fill zero in empty column
+df1.fillna(value=0)
+df1.head()
+
+#find correlation
+corr = df1.corr()
+corr
+
+#plot heatmap for correlation
+sns.heatmap(corr, annot=True)
+
+#scatter plot for age and balance column
+plt.scatter(df1['Age'], df1['Balance'])
+
+#kmeans model for 4 clusters
+km = KMeans(n_clusters=4)
+km
+
+# fit the model
+y_predicted= km.fit_predict(df[['Age','Balance']])
+y_predicted
+
+#predict the model
+km.predict([[60,50000]])
+
+# assign the predicted values into new variables
+df['cluster']= y_predicted
+
+df.head()# dispaly top 5
+
+#display new clusterd data using plots
+df1 = df[df.cluster==0]
+df2 = df[df.cluster==1]
+df3 = df[df.cluster==2]
+df4 = df[df.cluster==3]
+
+plt.scatter(df1.Age, df1['Balance'],color= 'violet')
+plt.scatter(df2.Age, df2['Balance'],color= 'green')
+plt.scatter(df3.Age, df3['Balance'],color= 'orange')
+plt.scatter(df4.Age, df4['Balance'],color= 'yellow')
+
+plt.xlabel('Age')
+plt.ylabel('Balance')
+
+#apply kmeans for 3 clusters
+km = KMeans(n_clusters=3)
+y_predicted= km.fit_predict(df[['Age','Balance']])
+y_predicted
+
+#predict the model
+km.predict([[12,40000.50]])
+
+# assign the predicted values into new variables
+df['cluster']= y_predicted
+
+df.head()# dispaly top 5
+
+#display data
+df1 = df[df.cluster==0]
+df2 = df[df.cluster==1]
+df3 = df[df.cluster==2]
+
+plt.scatter(df1.Age, df1['Balance'],color= 'yellow')
+plt.scatter(df2.Age, df2['Balance'],color= 'orange')
+plt.scatter(df3.Age, df3['Balance'],color= 'green')
+
+plt.scatter(km.cluster_centers_[:,0],km.cluster_centers_[:,1],color='black', marker ='+',label ='centroid')
+plt.legend()
+
+#fit the model
+k_rng = range(1,10)
+sse=[]
+for k in k_rng:
+    km=KMeans(n_clusters=k)
+    km.fit(df[['Age','Balance']])
+    sse.append(km.inertia_)
+
+sse #sum square error
+#plot using line graph for errors
+plt.xlabel('k')
+plt.ylabel('sum squared error')
+plt.plot(k_rng,sse)
+
+2.	Hierarchical Clustering
+
+#import the data
+import pandas as pd
+import numpy as np
+import seaborn as sns
+from matplotlib import pyplot as plt
+from scipy.cluster.hierarchy import dendrogram, linkage
+from matplotlib import style
+style.use('ggplot')
+
+#import and display data
+df = pd.read_csv("P6-UK-Bank-Customers.csv")
+df.head()
+
+linkage_matrix = linkage(df2, 'ward') # apply model
+
+#display the matrix
+linkage_matrix
+
+#plot the cluster using dendogram
+plt.figure(figsize=(100, 20))
+plt.title('Clustering data')
+plt.xlabel('Balance')
+plt.ylabel('Age')
+plt.axhline(y=500)
+plt.axhline(y=200)
+dendrogram(
+    linkage_matrix,
+    labels = df2.index,
+    leaf_rotation = 90.,
+    leaf_font_size = 20.,
+    show_contracted = True
+)
+# plt.savefig('dendrogram.png',transparent=True, dpi=90)
+plt.show()
+
+#display unique data
+df2.index.unique()
+
+3.	Regression Model Deep Learning
+
+#To import libraries
+import pandas as pd
+import numpy as np
+import numpy
+from numpy import array
+import matplotlib.pyplot as plt
+import tensorflow as tf
+import sklearn as sk
+from tensorflow import keras
+from tensorflow.keras import layers
+from tensorflow.keras.layers.experimental import preprocessing
+from sklearn.model_selection import train_test_split
+from keras.models import Sequential
+from keras.layers import Dense, Activation
+#import dataset
+df = pd.read_csv("/content/sample_data/P6-UK-Bank-Customers.csv", delimiter = ",",
+    names=["Customer ID","Age","Balance"])
+print(df.head())
+print("\n")
+
+X = df.drop(["Customer ID","Age"], axis=1)
+y = df["Age"]
+print(X[0:15])
+print(y[0:15])
+print("\n")
+
+#Train, test and split the dataset. Random number generator, with popular integer see numbers are 0 and 42
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
+#Build a Keras Regression Model
+#Input Layer, only 1 input features
+#Output layer, only 1 value
+model = Sequential()
+model.add(Dense(1, activation='relu', input_shape=(1,)))
+model.add(Dense(256, activation='relu'))
+model.add(Dense(256, activation='relu'))
+model.add(Dense(256, activation='relu'))
+model.add(Dense(1, activation='relu'))
+print("The model summary is ")
+print(model.summary())
+print("\n")
+
+#Compilation and optimisation
+#Metrics for Keras
+model.compile(loss='mse', optimizer='adam', 
+             metrics=['mse', 'mae'])
+
+#train and fir model
+history = model.fit(X_train,y_train,batch_size=100,epochs=100,verbose=1)
+
+#Evaluation of Model
+#https://machinelearningmastery.com/evaluate-performance-deep-learning-models-keras/
+scores=model.evaluate(X_test, y_test, verbose=1)
+print("\n")
+print("Loss, MSE (Mean Squared Error), MAE(Mean Absolute Error)")
+print(scores)
+print("\n")
+
